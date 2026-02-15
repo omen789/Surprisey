@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Valentine's Day</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Playfair Display', serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #ff6b9d 75%, #fda085 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        #petalCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+            padding: 20px;
+        }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(3rem, 8vw, 6rem);
+            color: #fff;
+            text-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .subtitle {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 50px;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 18px 50px;
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:hover {
+            background: #fff;
+            color: #691e48;
+            box-shadow: 0 0 25px rgba(255, 105, 180, 0.6), 0 8px 30px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px) scale(1.03);
+            font-weight: bold;
+        }
+
+        .btn:active {
+            transform: translateY(0) scale(1.01);
+            transition: all 0.15s ease;
+        }
+
+        /* Screen 2 Buttons */
+        .question-text {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            color: #fff;
+            margin-bottom: 50px;
+            text-align: center;
+            text-shadow: 0 3px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .button-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 200px;
+            align-items: flex-start;
+        }
+
+        #noBtn {
+            position: absolute;
+            transition: all 0.2s ease;
+            z-index: 50;
+        }
+
+        /* Screen 3 Loading */
+        .loading-text {
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(2rem, 5vw, 3rem);
+            color: rgba(255, 255, 255, 0.9);
+            letter-spacing: 0.3em;
+            animation: breathe 2s ease-in-out infinite;
+            text-shadow: 0 0 20px rgba(255, 182, 193, 0.6);
+        }
+
+        @keyframes breathe {
+            0%, 100% { 
+                opacity: 0.4;
+                text-shadow: 0 0 10px rgba(255, 182, 193, 0.3);
+            }
+            50% { 
+                opacity: 1;
+                text-shadow: 0 0 30px rgba(255, 182, 193, 0.8), 0 0 60px rgba(255, 105, 180, 0.5);
+            }
+        }
+
+        /* Screen 4 - Emotional Choice */
+        .choice-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+            max-width: 400px;
+        }
+
+        .choice-btn {
+            padding: 15px 30px;
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            font-family: 'Playfair Display', serif;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .choice-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
+        }
+
+        /* Screen 5 - "Not enough" Response */
+        .response-text {
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            color: #fff;
+            text-shadow: 0 4px 20px rgba(255, 105, 180, 0.6);
+            line-height: 1.4;
+            max-width: 600px;
+            opacity: 0;
+            transform: scale(0.9);
+            animation: responseAppear 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes responseAppear {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Screen 6 - Typewriter (was Screen 4) */
+        .typewriter-container {
+            max-width: 700px;
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        /* Progressive Text Reveal */
+        .progressive-text {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .progressive-text.show {
+            animation: fadeInUp 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .progressive-text:nth-child(2) { animation-delay: 0.5s; }
+        .progressive-text:nth-child(3) { animation-delay: 1s; }
+
+        /* Screen 7 - Press and Hold */
+        .press-hold-container {
+            text-align: center;
+        }
+
+        .flower-center {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 40px;
+            filter: drop-shadow(0 0 30px rgba(255, 105, 180, 0.8));
+            animation: flowerPulse 2s ease-in-out infinite;
+        }
+
+        .flower-center img {
+            width: 100%;
+            height: 100%;
+        }
+
+        @keyframes flowerPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .hold-instruction {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 30px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .hold-button {
+            width: 200px;
+            height: 60px;
+            position: relative;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            margin: 0 auto;
+        }
+
+        .hold-button:active {
+            transform: scale(0.98);
+        }
+
+        .hold-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ff6b9d 0%, #fda085 100%);
+            transition: width 0.1s linear;
+            border-radius: 50px;
+        }
+
+        .hold-text {
+            position: relative;
+            z-index: 2;
+            line-height: 60px;
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            color: #fff;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+            letter-spacing: 1px;
+            font-size: 1.1rem;
+        }
+
+        .hold-button.glowing {
+            box-shadow: 0 0 30px rgba(255, 105, 180, 0.8), 0 0 60px rgba(255, 182, 193, 0.5);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Screen 8 - Heartbeat Moment */
+        .heartbeat-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s ease;
+        }
+
+        .heartbeat-overlay.active {
+            opacity: 1;
+            animation: heartbeat 2s ease-in-out;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { opacity: 0.6; }
+            25%, 75% { opacity: 0.8; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes fadeInFlower {
+            from {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .typewriter-heading {
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(2rem, 5vw, 3rem);
+            color: #fff;
+            margin-bottom: 30px;
+            text-shadow: 0 3px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .typewriter-text {
+            font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+            color: #fff;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            min-height: 200px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        #typewriterBtn {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(10px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #typewriterBtn.show {
+            opacity: 1;
+            pointer-events: all;
+            transform: translateY(0);
+        }
+
+        /* Screen 8 Envelope */
+        .envelope-container {
+            text-align: center;
+        }
+
+        .envelope {
+            width: clamp(200px, 50vw, 350px);
+            height: auto;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
+            margin-bottom: 30px;
+        }
+
+        .envelope:hover {
+            transform: scale(1.08) translateY(-5px);
+            filter: drop-shadow(0 0 30px rgba(255, 105, 180, 0.8));
+        }
+
+        .tap-text {
+            font-size: clamp(1.3rem, 3vw, 2rem);
+            color: #fff;
+            text-shadow: 0 3px 15px rgba(0, 0, 0, 0.3);
+            animation: pulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                opacity: 0.7;
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 1;
+                transform: scale(1.05);
+            }
+        }
+
+        /* Final Letter */
+        #blurOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 50;
+        }
+
+        #blurOverlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        #finalLetter {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            max-width: 90%;
+            width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            padding: 50px 40px;
+            box-shadow: 0 20px 60px rgba(255, 105, 180, 0.4), 0 0 100px rgba(255, 182, 193, 0.3);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 100;
+            text-align: center;
+        }
+
+        #finalLetter.show {
+            opacity: 1;
+            pointer-events: all;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .letter-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(2.5rem, 6vw, 3.5rem);
+            background: linear-gradient(to right, #fff, #ffebee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 10px rgba(255, 105, 180, 0.3);
+            line-height: 1.3;
+        }
+
+        .letter-content {
+            font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+            color: #fff;
+            line-height: 1.9;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .letter-closing {
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            color: #fff;
+            text-shadow: 0 3px 12px rgba(255, 105, 180, 0.4);
+        }
+
+        /* Scrollbar styling for letter */
+        #finalLetter::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #finalLetter::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        #finalLetter::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        #finalLetter::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .button-container {
+                gap: 20px;
+            }
+
+            .typewriter-container {
+                padding: 30px 20px;
+            }
+
+            #finalLetter {
+                padding: 40px 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Canvas for petals and hearts -->
+    <canvas id="petalCanvas"></canvas>
+
+    <!-- Screen 1: Intro -->
+    <div class="screen active" id="screen1">
+        <h1>Happy Valentine's</h1>
+        <p class="subtitle">A special moment.</p>
+        <button class="btn" onclick="goToScreen(2)">Open ✨</button>
+    </div>
+
+    <!-- Screen 2: Question -->
+    <div class="screen" id="screen2">
+        <p class="question-text">Are you ready for your surprise? 🌹</p>
+        <div class="button-container">
+            <button class="btn" onclick="goToScreen(3)" style="z-index: 50;">YES, ABSOLUTELY</button>
+            <button class="btn" id="noBtn">NOT REALLY</button>
+        </div>
+    </div>
+
+    <!-- Screen 3: Loading -->
+    <div class="screen" id="screen3">
+        <p class="loading-text">Gathering flowers...</p>
+    </div>
+
+    <!-- Screen 4: Emotional Choice -->
+    <div class="screen" id="screen4">
+        <p class="question-text">How special do you think you are?</p>
+        <div class="choice-container">
+            <button class="choice-btn" onclick="goToScreen(5)">A little</button>
+            <button class="choice-btn" onclick="goToScreen(5)">Somewhat</button>
+            <button class="choice-btn" onclick="goToScreen(5)">Very</button>
+            <button class="choice-btn" onclick="goToScreen(5)">Extremely</button>
+        </div>
+    </div>
+
+    <!-- Screen 5: "Not enough" Response -->
+    <div class="screen" id="screen5">
+        <p class="response-text">Not enough.<br>You deserve more than that.</p>
+    </div>
+
+    <!-- Screen 6: Typewriter (was Screen 4) -->
+    <div class="screen" id="screen6">
+        <div class="typewriter-container">
+            <h2 class="typewriter-heading">Before I give this to you…</h2>
+            <p class="typewriter-text" id="typewriterText"></p>
+            <div id="progressiveTextContainer" style="margin-top: 30px;">
+                <p class="progressive-text" style="font-size: clamp(1.2rem, 3vw, 1.6rem); color: #fff; margin-bottom: 15px;">Still here?</p>
+                <p class="progressive-text" style="font-size: clamp(1.2rem, 3vw, 1.6rem); color: #fff; margin-bottom: 15px;">Good.</p>
+                <p class="progressive-text" style="font-size: clamp(1.2rem, 3vw, 1.6rem); color: #fff; margin-bottom: 20px;">Then you deserve to see it.</p>
+            </div>
+            <button class="btn" id="typewriterBtn" onclick="goToScreen(7)">Continue ✨</button>
+        </div>
+    </div>
+
+    <!-- Screen 7: Press and Hold -->
+    <div class="screen" id="screen7">
+        <div class="press-hold-container">
+            <div class="flower-center">
+                <img src="flowers.png" alt="Rose">
+            </div>
+            <p class="hold-instruction">Press and hold to unlock your surprise…</p>
+            <div class="hold-button" id="holdButton">
+                <div class="hold-fill" id="holdFill"></div>
+                <div class="hold-text">Hold Me</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 8: Envelope (was Screen 5) -->
+    <div class="screen" id="screen8">
+        <div class="envelope-container">
+            <img src="letter.png" alt="Love Letter" class="envelope" onclick="openEnvelope()">
+            <p class="tap-text">Tap letter to Open</p>
+        </div>
+    </div>
+
+    <!-- Heartbeat Overlay -->
+    <div id="heartbeatOverlay" class="heartbeat-overlay"></div>
+
+    <!-- Blur Overlay -->
+    <div id="blurOverlay"></div>
+
+    <!-- Final Letter -->
+    <div id="finalLetter">
+        <h1 class="letter-title">You are truly special Margaret.</h1>
+        <p class="letter-content">
+            We might be friends now, but I wanted to take this moment to make you feel as bright and beautiful as you make the world around you.
+        </p>
+        <p class="letter-closing">Happy Valentine's Day ❤️</p>
+    </div>
+
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('petalCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+        let animationMode = 'petals'; // 'petals' or 'hearts'
+
+        // Petal class
+        class Petal {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = -20;
+                this.size = Math.random() * 8 + 5;
+                this.speedY = Math.random() * 1 + 0.5;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = Math.random() * 2 - 1;
+                this.opacity = Math.random() * 0.6 + 0.4;
+            }
+
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                this.rotation += this.rotationSpeed;
+
+                if (this.y > canvas.height) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation * Math.PI / 180);
+                ctx.globalAlpha = this.opacity;
+                
+                // Draw petal shape
+                ctx.fillStyle = '#ffb3c1';
+                ctx.beginPath();
+                ctx.ellipse(0, 0, this.size, this.size * 1.5, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+
+        // Heart class
+        class Heart {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + 20;
+                this.size = Math.random() * 15 + 10;
+                this.speedY = Math.random() * 1.5 + 1;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.opacity = Math.random() * 0.6 + 0.4;
+            }
+
+            update() {
+                this.y -= this.speedY;
+                this.x += this.speedX;
+
+                if (this.y < -30) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = '#ff69b4';
+                
+                // Draw heart shape
+                const size = this.size;
+                ctx.beginPath();
+                ctx.moveTo(0, size * 0.3);
+                ctx.bezierCurveTo(-size * 0.5, -size * 0.3, -size, size * 0.1, 0, size);
+                ctx.bezierCurveTo(size, size * 0.1, size * 0.5, -size * 0.3, 0, size * 0.3);
+                ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+
+        // Initialize particles
+        function initParticles(mode) {
+            animationMode = mode;
+            particles = [];
+            const count = mode === 'petals' ? 50 : 30;
+            
+            for (let i = 0; i < count; i++) {
+                if (mode === 'petals') {
+                    particles.push(new Petal());
+                } else {
+                    particles.push(new Heart());
+                }
+            }
+        }
+
+        // Animation loop
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            
+            requestAnimationFrame(animate);
+        }
+
+        // Initialize with petals
+        initParticles('petals');
+        animate();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Screen navigation
+        let currentScreen = 1;
+
+        function goToScreen(screenNum) {
+            document.getElementById(`screen${currentScreen}`).classList.remove('active');
+            currentScreen = screenNum;
+            document.getElementById(`screen${screenNum}`).classList.add('active');
+
+            // Special actions for certain screens
+            if (screenNum === 3) {
+                setTimeout(() => {
+                    goToScreen(4);
+                }, 2000);
+            } else if (screenNum === 5) {
+                // "Not enough" screen - auto advance after 3 seconds
+                setTimeout(() => {
+                    goToScreen(6);
+                }, 3000);
+            } else if (screenNum === 6) {
+                startTypewriter();
+            } else if (screenNum === 7) {
+                initHoldButton();
+            }
+        }
+
+        // Screen 2: Moving NO button
+        const noBtn = document.getElementById('noBtn');
+        
+        function moveNoButton() {
+            const maxX = window.innerWidth - noBtn.offsetWidth - 40;
+            const maxY = window.innerHeight - noBtn.offsetHeight - 40;
+            
+            const newX = Math.random() * maxX;
+            const newY = Math.random() * maxY;
+            
+            noBtn.style.position = 'absolute';
+            noBtn.style.left = newX + 'px';
+            noBtn.style.top = newY + 'px';
+        }
+
+        // Desktop: move on hover
+        noBtn.addEventListener('mouseenter', moveNoButton);
+        noBtn.addEventListener('mouseover', moveNoButton);
+
+        // Mobile: move on touch
+        noBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            moveNoButton();
+        });
+        
+        // Also move on click just in case
+        noBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            moveNoButton();
+        });
+
+        // Screen 6: Typewriter effect with progressive text
+        const fullText = "We might be friends now... But honestly? You are genuinely special to me. I wanted to remind you how amazing you are and of course your beautiful eyes as well. :)\n\nAre you ready to see your surprise?";
+        let charIndex = 0;
+
+        function startTypewriter() {
+            const textElement = document.getElementById('typewriterText');
+            const btn = document.getElementById('typewriterBtn');
+            const progressiveContainer = document.getElementById('progressiveTextContainer');
+            
+            textElement.textContent = '';
+            charIndex = 0;
+            btn.classList.remove('show');
+            
+            // Hide progressive text initially
+            const progressiveTexts = progressiveContainer.querySelectorAll('.progressive-text');
+            progressiveTexts.forEach(text => text.classList.remove('show'));
+            progressiveContainer.style.display = 'none';
+            
+            typeNextChar();
+        }
+
+        function typeNextChar() {
+            if (charIndex < fullText.length) {
+                const textElement = document.getElementById('typewriterText');
+                textElement.textContent += fullText[charIndex];
+                charIndex++;
+                
+                const delay = fullText[charIndex - 1] === '.' || fullText[charIndex - 1] === '?' || fullText[charIndex - 1] === '!' ? 300 : 50;
+                setTimeout(typeNextChar, delay);
+            } else {
+                // Show progressive text after typewriter finishes
+                setTimeout(() => {
+                    const progressiveContainer = document.getElementById('progressiveTextContainer');
+                    progressiveContainer.style.display = 'block';
+                    
+                    const progressiveTexts = progressiveContainer.querySelectorAll('.progressive-text');
+                    progressiveTexts.forEach((text, index) => {
+                        setTimeout(() => {
+                            text.classList.add('show');
+                        }, index * 800);
+                    });
+                    
+                    // Show button after all progressive text appears
+                    setTimeout(() => {
+                        document.getElementById('typewriterBtn').classList.add('show');
+                    }, progressiveTexts.length * 800 + 500);
+                }, 1000);
+            }
+        }
+
+        // Screen 7: Press and Hold functionality
+        let holdInterval = null;
+        let holdProgress = 0;
+        const holdDuration = 3000; // 3 seconds to fill
+        const updateInterval = 50; // Update every 50ms
+
+        function initHoldButton() {
+            const button = document.getElementById('holdButton');
+            const fill = document.getElementById('holdFill');
+            
+            holdProgress = 0;
+            fill.style.width = '0%';
+            button.classList.remove('glowing');
+            
+            // Mouse events
+            button.addEventListener('mousedown', startHold);
+            button.addEventListener('mouseup', stopHold);
+            button.addEventListener('mouseleave', stopHold);
+            
+            // Touch events
+            button.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                startHold();
+            });
+            button.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                stopHold();
+            });
+            button.addEventListener('touchcancel', stopHold);
+        }
+
+        function startHold() {
+            const button = document.getElementById('holdButton');
+            const fill = document.getElementById('holdFill');
+            
+            if (holdInterval) return; // Already holding
+            
+            button.classList.add('glowing');
+            
+            holdInterval = setInterval(() => {
+                holdProgress += updateInterval;
+                const percentage = (holdProgress / holdDuration) * 100;
+                fill.style.width = percentage + '%';
+                
+                if (holdProgress >= holdDuration) {
+                    stopHold();
+                    completeHold();
+                }
+            }, updateInterval);
+        }
+
+        function stopHold() {
+            if (holdInterval) {
+                clearInterval(holdInterval);
+                holdInterval = null;
+            }
+            
+            const button = document.getElementById('holdButton');
+            const fill = document.getElementById('holdFill');
+            
+            // Reset if not completed
+            if (holdProgress < holdDuration) {
+                button.classList.remove('glowing');
+                setTimeout(() => {
+                    holdProgress = 0;
+                    fill.style.width = '0%';
+                }, 200);
+            }
+        }
+
+        function completeHold() {
+            // Transition to next screen
+            setTimeout(() => {
+                goToScreen(8);
+            }, 500);
+        }
+
+        // Screen 8: Open envelope with heartbeat moment
+        function openEnvelope() {
+            // Smoothly hide envelope screen
+            const screen8 = document.getElementById('screen8');
+            screen8.style.transition = 'opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+            screen8.style.opacity = '0';
+            
+            setTimeout(() => {
+                // Switch to hearts animation
+                initParticles('hearts');
+                
+                // Show heartbeat overlay
+                const heartbeat = document.getElementById('heartbeatOverlay');
+                heartbeat.classList.add('active');
+                
+                setTimeout(() => {
+                    // Remove heartbeat and show blur + letter
+                    heartbeat.classList.remove('active');
+                    document.getElementById('blurOverlay').classList.add('active');
+                    
+                    setTimeout(() => {
+                        document.getElementById('finalLetter').classList.add('show');
+                    }, 400);
+                }, 2000); // Heartbeat lasts 2 seconds
+            }, 600);
+        }
+    </script>
+</body>
+</html>
